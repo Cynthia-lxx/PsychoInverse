@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PsychoInverse · 量表反算器 | MMPI-2</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%A5%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="assets/squarelike_diag_favicon.png">
 <style>
   :root {
     --bg: #f4f6fa;
@@ -206,8 +206,8 @@
     background: var(--panel); border-bottom: 1px solid var(--line);
   }
   .brandbar-icon {
-    width: 20px; height: 20px; flex: none; border-radius: 6px;
-    border: 1px dashed var(--line); background: var(--bg);
+    height: 20px; width: auto; flex: none; border-radius: 6px;
+    border: none; background: none; object-fit: contain;
   }
   .brandbar-slogan {
     font-size: 12.5px; font-weight: 650; letter-spacing: .02em; color: var(--ink);
@@ -224,8 +224,8 @@
   }
   .credits-brand { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .credits-logo {
-    width: 118px; height: 44px; border-radius: 9px;
-    border: 1px dashed var(--line); background: var(--bg);
+    height: 44px; width: auto; border-radius: 9px;
+    border: none; background: none; object-fit: contain; max-width: 100%;
   }
   .credits-brand-note { margin: 0; font-size: 11.5px; color: var(--muted); }
   .credits-cols { display: grid; grid-template-columns: repeat(3, minmax(110px, 1fr)); gap: 26px; }
@@ -743,9 +743,9 @@
 </div>
 <div class="loadbar-pct" id="loadbar-pct" hidden aria-hidden="true"></div>
 
-<!-- Top brand strip: empty icon slot for the future PsychoInverse icon + slogan (no media assets yet). -->
+<!-- Top brand strip: PsychoInverse mark (assets/squarelike_diag.png, trans-flag diagonal gradient). -->
 <div class="brandbar" id="brandbar" role="banner">
-  <span class="brandbar-icon" aria-hidden="true"></span>
+  <img class="brandbar-icon" src="assets/squarelike_diag.png" alt="PsychoInverse">
   <span class="brandbar-slogan">手撕所有心理学量表！</span>
 </div>
 
@@ -911,12 +911,12 @@
   </section>
 </main>
 
-<!-- Footer credits: brand area intentionally empty for now; Project / Updates / Contact columns. -->
+<!-- Footer credits: PsychoInverse brand mark (assets/rectlike_diag.png, trans-flag diagonal gradient). -->
 <footer class="credits" id="credits" role="contentinfo">
   <div class="credits-inner">
-    <div class="credits-brand" aria-label="PsychoInverse 品牌区（待补充）">
-      <span class="credits-logo" aria-hidden="true"></span>
-      <p class="credits-brand-note">品牌区待补充</p>
+    <div class="credits-brand" aria-label="PsychoInverse 品牌区">
+      <img class="credits-logo" src="assets/rectlike_diag.png" alt="PsychoInverse">
+      <p class="credits-brand-note">PsychoInverse · 量表反算器</p>
     </div>
     <nav class="credits-cols" aria-label="项目与联系方式">
       <section class="credits-col">
