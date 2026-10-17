@@ -7,7 +7,7 @@ them would break the target) and which are *free* (any combination still satisfi
 the target). Results can be exported to XLSX / CSV / TSV / HTML / JSON / Markdown,
 or a real answer sheet can be imported and scored instead.
 
-- Live demo: <https://cynthia-lxx.github.io/MMPI-2-Solver/>
+- Live demo: <https://cynthia-lxx.github.io/PsychoInverse/>
 - Source: <https://github.com/Cynthia-lxx/PsychoInverse>
 
 No build step, no runtime dependencies, no backend. The repository root **is** the

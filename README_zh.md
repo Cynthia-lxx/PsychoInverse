@@ -2,7 +2,7 @@
 
 纯前端的**心理学量表反算器**：给一个量表的若干维度指定目标分，反求出能得出该剖面的作答（答卷），并标出哪些题是「锁定」的（翻转会破坏目标）、哪些是「自由」的（任意组合仍能满足目标）。结果可导出为 XLSX / CSV / TSV / HTML / JSON / Markdown，也可以反过来读入一份真实答卷直接评分。
 
-- 在线地址：<https://cynthia-lxx.github.io/MMPI-2-Solver/>
+- 在线地址：<https://cynthia-lxx.github.io/PsychoInverse>
 - 源码仓库：<https://github.com/Cynthia-lxx/PsychoInverse>
 
 没有构建步骤、没有运行时依赖、没有后端——仓库根目录就是 Pages 的根，所有资源都用相对路径引用，所以放在 `https://<user>.github.io/<repo>/` 这种子路径下也能直接跑。
