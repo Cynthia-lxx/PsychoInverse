@@ -1,78 +1,175 @@
-# MMPI-2 Solver
+# PsychoInverse · Scale Inverse Solver
 
-纯前端的 MMPI-2 反算器：指定一组目标 T 分，反求出满足该剖面的 567 题答卷，并标出哪些题是被锁定的、哪些可以自由组合；还能把结果导出成 xlsx / csv / tsv / html / json / markdown 表格，或反过来读入一份真实答卷直接评分。
+A pure front-end **inverse solver for psychological scales**. Pick target scores
+for the dimensions of a scale and it reconstructs a response pattern (answer
+sheet) that yields those scores — then tells you which items are *locked* (flipping
+them would break the target) and which are *free* (any combination still satisfies
+the target). Results can be exported to XLSX / CSV / TSV / HTML / JSON / Markdown,
+or a real answer sheet can be imported and scored instead.
 
-在线地址：<https://cynthia-lxx.github.io/MMPI-2-Solver/>
+- Live demo: <https://cynthia-lxx.github.io/MMPI-2-Solver/>
+- Source: <https://github.com/Cynthia-lxx/PsychoInverse>
 
-没有构建步骤、没有依赖、没有后端——仓库根目录就是 Pages 的根，所有资源都用相对路径引用，所以放在 `https://<user>.github.io/<repo>/` 这种子路径下也能直接跑。
+No build step, no runtime dependencies, no backend. The repository root **is** the
+GitHub Pages root; all assets are referenced by relative paths, so it also runs
+from a sub-path such as `https://<user>.github.io/<repo>/`.
 
-## 功能
+---
 
-- **四种预期值模式**（工具栏「预期值模式」，批量输入里也有对应写法）：
-  - `精确值（=）` Hs 70 —— 必须正好等于该 T 分
-  - `区间（lo…hi）` Hs 65–75 —— 落在区间内即算命中，求解器在区间内自行取值
-  - `不低于（≥）` Hs ≥ 65 / `不高于（≤）` Hs ≤ 70 —— 区间的一端敞开
-  - 批量写法：`Hs=70`、`Hs 65-75`、`Hs>=65`、`Hs<=70`（`~` / `..` / `≥` / `≤` 也都认）
-  - 放宽成区间后可行解变多，因此额外标出「区间内可翻转」的题（蓝色虚线框）：它们会改动目标量表，但翻过去后目标仍落在区间内，只能一道一道改；结构性的「自由题」（粉色虚线框）依旧可以任意组合，2ⁿ 种组合同时成立。
-- **反算答卷**：给 13 个基本量表（或任意 87 个量表）指定预期值，求解一组 T/F 回答使其剖面尽量贴合目标。
-  - 求解强度三档（快速 / 标准 / 深度），性别可选，VRIN / TRIN 可选「原程序公式」或「修正公式」。
-  - 结果里区分**锁定题**（翻转会破坏目标，悬停看它影响哪些量表）与**自由题**（虚线框，点击即可随意翻转）。
-  - 「换一组」重跑求解，「随机化自由题」在不改变剖面前提下拉出另一套等价答卷。
-- **导出表格**（导出面板，可多选内容 + 选格式）：
-  - 内容：答题表（567 题 × 题干 / 回答 / 是否自由）、量表剖面（87 个量表的原始分 / 美国 T / 中国 T）、目标达成（偏差与折算）、空白答题模板（供真人作答，不需要先求解）。
-  - 格式：`.xlsx`（勾选几项就出几张工作表，零依赖手写 XLSX 打包器）、CSV（带 BOM，Excel 打开不乱码）、TSV、HTML、JSON、Markdown。
-- **导入答卷并评分**：粘贴 567 字符 T/F 串、每行一个答案（T/F、True/False、是/否），或每行「题号,答案」，也可选 `.txt/.csv/.tsv` 文件；算出 87 量表剖面，未作答题随机填充并列出；「用作求解目标」把读到的 13 个基本量表设为目标反推答卷。
-- **题库面板**：567 题原文一览——英文原题措辞 + 中文译文 + 当前回答 + 自由/锁定状态；可按题号或中英题干搜索，按「自由题 / 锁定题 / 作答是 / 作答否」筛选。不求解也能当可检索题库用。
-- **题干语言**：网格里的题干可选「中文 / 英文原文 / 中英对照」，悬停提示始终中英双列。
-- **深色 / 浅色模式**：工具栏一键切换，首次访问跟随系统偏好（`prefers-color-scheme`），选择记在 localStorage；`<head>` 内联脚本在首屏绘制前定主题，避免闪烁。
-- **多端自适应**：PC / 平板横屏走双栏布局，≤1024px 自动单列堆叠；≤640px 工具栏横向滚动、答题网格更密、表格收窄；手机横屏（矮高度）压缩头部并降低题库面板高度。
-- **中国常模 T 分**（仅 29 个量表有公开参数，其余一律留空而不编造数字）、K 校正标注。
-- **自包含单文件**：`index.html` 是把全部脚本内联进一个 HTML 的产物，双击即可用，无需服务器、无需 `file://` 下的 ES 模块（构建脚本 `build-site.mjs` 由 `index.src.html` + 源码生成）。开发态的模块化源码是 `index.src.html`。
+## Features
 
-## 用法
+- **Target modes** (T-score scales, e.g. MMPI-2): exact `=` (`Hs 70`), range
+  `lo…hi` (`Hs 65-75`), lower-bounded `≥` (`Hs>=65`), upper-bounded `≤`
+  (`Hs<=70`) — `~` / `..` / `≥` / `≤` are all accepted, and batch input is
+  supported. Relaxing to an interval yields more feasible solutions and additionally
+  flags *flippable-within-interval* items (blue dashed) distinct from structural
+  *free* items (pink dashed).
+- **Inverse solving**: set targets for MMPI-2's 13 basic (or any of its 87) scales;
+  three solver intensities (quick / standard / deep); optional sex; VRIN/TRIN in
+  either the *original* or *corrected* formula. Locked vs. free items are
+  distinguished (hover a locked item to see which scales it affects); **Regenerate**
+  re-runs the solver; **Randomize free items** pulls another equivalent sheet without
+  changing the profile.
+- **Export tables** (multi-select content + format): answer sheet (567 items ×
+  stem / answer / free-flag), scale profile (87 scales: raw / US-T / China-T),
+  target attainment (deviation & scaling), and a blank template for human answering.
+  Formats: `.xlsx` (one worksheet per selected section, zero-dependency hand-rolled
+  XLSX packer), CSV (BOM-prefixed), TSV, HTML, JSON, Markdown.
+- **Import & score**: paste a 567-char `T/F` string, one answer per line
+  (`T/F`, `True/False`, `是/否`), or `num,answer` per line, or upload
+  `.txt/.csv/.tsv`; the 87-scale profile is computed and listed; **Use as solve
+  target** sets the 13 basic scales as inversion targets.
+- **Item-bank panel**: browse all 567 items — English stem + Chinese translation +
+  current answer + free/locked state; search by number or EN/ZH stem; filter by
+  free / locked / answered-yes / answered-no. Usable as a searchable item bank even
+  without solving.
+- **Item language**: grid stems toggle Chinese / English original / both; hover
+  tooltips always show both columns.
+- **Dark / light theme**: one-click toggle; first visit follows the OS
+  (`prefers-color-scheme`), choice stored in `localStorage`; an inline `<head>`
+  script sets the theme before first paint to avoid flashing.
+- **Responsive**: PC / tablet-landscape use a two-column layout; ≤1024px collapses
+  to a single column; ≤640px the toolbar scrolls horizontally and grids/tables
+  tighten; phone-landscape compresses the header and shrinks the item panel.
+- **China-norm T scores** (only 29 scales publish parameters — the rest are left
+  blank rather than fabricated), with K-correction annotations.
+- **Self-contained single file**: `index.html` is the artifact with every script
+  inlined — double-click to open, no server, and no `file://` ES-module issues
+  (generated by `build-site.mjs` from `index.src.html` + the source modules).
+  The MBTI question banks are loaded as an **async chunk**: the first paint excludes
+  ~10k KNN samples and only fetches them when an MBTI scale is opened.
 
-1. 直接访问上面的 Pages 地址。
-2. 左侧勾选量表填目标 T 分（支持搜索框与批量输入 `Hs=70`、`Sc 81`、`Pt:74`），点「生成答卷」。
-3. 右侧查看目标达成表、完整剖面与 567 题网格；需要存档就去左侧「导出表格」。
+---
 
-本地跑：
+## Supported scales
+
+| Scale | Type | Notes |
+| --- | --- | --- |
+| MMPI-2 | binary (567 items) | 87 scales; T-scores; China-norm T for 29 scales; K-correction |
+| SCL-90 | Likert | symptom self-rating; dimension target scores |
+| PHQ-9 | Likert | depression screen (0–27) |
+| GAD-7 | Likert | anxiety screen |
+| HADS | Likert | anxiety & depression |
+| WHO-5 | Likert | well-being |
+| MBTI-93 | typology | MBTI 93-item |
+| MBTI-28 (16P quick) | typology | 16personalities quick 28-item |
+| 16P-93 (16P standard) | typology | 16personalities standard 93-item |
+| 16P-200 (16P full) | typology | 16personalities full 200-item |
+| MBTI-200MD | typology | MBTI 200-item authoritative |
+| 16P-60 (KNN) | typology | 16personalities 60-item (KNN dataset) |
+
+---
+
+## Usage
+
+1. Open the demo link above, or `index.html` directly.
+2. Pick a scale, set target scores for its dimensions (search box + batch input
+   like `Hs=70`, `Sc 81`, `Pt:74`), then click **生成答卷 / Generate**.
+3. Inspect the target-attainment table, the full profile, and the 567-item grid;
+   export from the left **导出表格 / Export** panel when you need a file.
+
+Run locally:
 
 ```bash
 python serve.py          # http://127.0.0.1:8137
-# 或
-npx serve .              # 任意静态服务器都行
+# or any static server, e.g.
+npx serve .
 ```
 
-> `index.html` 是自包含单文件，直接双击也能打开（无需起服务器、不受 `file://` 的 ES 模块限制）。本地开发用 `serve.py` 起服务也一样。
+> `index.html` is a self-contained single file and also opens by double-click
+> (no server needed, no `file://` ES-module restrictions). `serve.py` is just for
+> local development.
 
-## 目录
+---
 
-| 文件 | 作用 |
+## Project layout
+
+| File | Role |
 | --- | --- |
-| `index.html` | **构建产物**：内联了全部脚本的单文件页面，GitHub Pages 入口，双击可用 |
-| `index.src.html` | 开发态的模块化页面骨架（`<script type="module" src="./gui.js">`），`build-site.mjs` 的输入 |
-| `data.js` | 567 题题干（中/英）、87 量表定义与键控、常模表、中国常模参数 |
-| `inverse.js` | 求解内核：计分、可达值、目标审计、反算、VRIN/TRIN |
-| `xlsx.js` | 零依赖 XLSX 打包器（ZIP store + OOXML 最小实现） |
-| `sheet.js` | 四张导出表的构建 + 六种格式的序列化 |
-| `gui.js` | DOM 层：渲染、交互、导入导出面板（纯函数部分可在 Node 下测试） |
-| `build-site.mjs` | 把 `index.src.html` + 源码内联成单文件 `index.html`（`npm run build`） |
-| `test-*.mjs` | Node 测试 |
-| `serve.py` | 本地预览服务器（禁用缓存） |
+| `index.html` | **Build artifact**: single self-contained page (all scripts inlined). Pages entry; double-click to open. |
+| `index.src.html` | Dev modular skeleton (`<script type="module" src="./gui.js">`); input to `build-site.mjs`. |
+| `data.js` | MMPI-2 567-item stems (zh/en), 87-scale definitions & keys, norms, China-norm params. |
+| `inverse.js` | Solver core: scoring, reachable values, target audit, inversion, VRIN/TRIN. |
+| `scl90.js` / `scl90.data.js`, `likert.js` | SCL-90 (and generic Likert) scale definitions, scoring, target scales. |
+| `phq9.data.js` / `gad7.data.js` / `hads.data.js` / `who5.data.js` | Likert-scale item banks. |
+| `mbti*.data.js`, `mbti.js`, `mbti_types.js` | MBTI / 16personalities question banks & engine (loaded async). |
+| `xlsx.js` | Zero-dependency XLSX packer (ZIP store + minimal OOXML). |
+| `sheet.js` | Builds the four export tables + the six format serializers. |
+| `ui-tokens.js` | Theme / UX-text / animation tokens consumed by the build. |
+| `gui.js` | DOM layer: render, interaction, import/export panels (pure parts testable in Node). |
+| `build-site.mjs` | Inlines `index.src.html` + sources into single `index.html` (`npm run build`). |
+| `serve.py` | Local preview server (cache disabled). |
+| `test-*.mjs` | Node tests. |
+| `assets/` | Brand images: `squarelike_diag.png` (top bar), `squarelike_diag_favicon.png` (128px favicon), `rectlike_diag.png` (footer brand). |
 
-## 测试
+---
+
+## Build & test
 
 ```bash
-node test-inverse.mjs    # 计分 / 可达值 / 反算
-node test-gui.mjs        # 求解与导出面板的纯函数部分
-node test-sheet.mjs      # 导出表与 xlsx/csv/tsv/md/html/json 序列化
-node test-dom.mjs        # jsdom 端到端冒烟（可选，需 npm install jsdom）
+npm run build                       # node build-site.mjs  -> index.html
+npm test                           # inverse + gui + sheet (node)
+node test-dom.mjs                  # jsdom end-to-end smoke (needs: npm install jsdom)
+node test-mbti.mjs                 # MBTI solver/engine
+node test-scl90.mjs                # SCL-90 scoring
+node test-likert.mjs               # Likert scoring
+node test-formats.mjs              # export serializers
+node test-gui-typology.mjs         # typology end-to-end
 ```
 
-## 免责声明
+Zero **runtime** dependencies; `jsdom` is only required for the DOM smoke test.
 
-MMPI-2 的题目文本与常模受 Pearson 版权保护，仓库收录仅作学习与研究之用，不得用于商业分发；请确认你所在司法辖区的适用规则。本工具输出的是**满足指定剖面的合成答卷**，不是心理测量结果，**不可用于临床评估、诊断或任何实际人事/司法决策**，也不得用于伪造测验结果。
+---
 
-## 许可与致谢
+## Brand & assets
 
-MIT（见 `LICENSE`）。求解逻辑源自 `MMPI_2_Grader`（Luke Sweatman，MIT），本仓库是其浏览器端 JS 移植 + 导出/导入层扩展。
+PsychoInverse brand marks:
+
+- **Top bar icon + favicon** — `assets/squarelike_diag.png`, plus a 128×128
+  `assets/squarelike_diag_favicon.png` derived from it.
+- **Footer brand mark** — `assets/rectlike_diag.png`.
+
+Both use a **trans-flag diagonal gradient** (top-left pink → white → bottom-right
+blue) on transparent backgrounds, matching the developer-name coloring. The
+developer name `CynthiaLx_` in the footer is rendered with the same gradient (a
+deeper pink→blue duotone in light theme for contrast).
+
+---
+
+## Disclaimer
+
+MMPI-2 item text and norms are copyrighted by Pearson; they are included here for
+study and research only and must not be redistributed commercially. The same
+caution applies to other proprietary instruments. **The output of this tool is a
+synthetic answer sheet that satisfies the specified profile — it is not a
+psychological measurement result**, and must not be used for clinical assessment,
+diagnosis, or any real personnel / legal decision, nor for fabricating test
+results. Confirm the rules that apply in your jurisdiction.
+
+---
+
+## License & acknowledgements
+
+MIT (see `LICENSE`). The solving logic originates from `MMPI_2_Grader`
+(Luke Sweatman, MIT); this repository is a browser-side JavaScript port plus an
+export/import layer extension.

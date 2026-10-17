@@ -1,0 +1,122 @@
+# PsychoInverse · 量表反算器
+
+纯前端的**心理学量表反算器**：给一个量表的若干维度指定目标分，反求出能得出该剖面的作答（答卷），并标出哪些题是「锁定」的（翻转会破坏目标）、哪些是「自由」的（任意组合仍能满足目标）。结果可导出为 XLSX / CSV / TSV / HTML / JSON / Markdown，也可以反过来读入一份真实答卷直接评分。
+
+- 在线地址：<https://cynthia-lxx.github.io/MMPI-2-Solver/>
+- 源码仓库：<https://github.com/Cynthia-lxx/PsychoInverse>
+
+没有构建步骤、没有运行时依赖、没有后端——仓库根目录就是 Pages 的根，所有资源都用相对路径引用，所以放在 `https://<user>.github.io/<repo>/` 这种子路径下也能直接跑。
+
+---
+
+## 功能
+
+- **目标值模式**（T 分制量表，如 MMPI-2）：`精确值（=）` `Hs 70`、 `区间（lo…hi）` `Hs 65-75`、 `不低于（≥）` `Hs>=65`、 `不高于（≤）` `Hs<=70`——`~` / `..` / `≥` / `≤` 也认，支持批量输入。放宽成区间后可行解变多，会额外标出「区间内可翻转」的题（蓝色虚线框），与结构性的「自由题」（粉色虚线框）区分开。
+- **反算答卷**：给 MMPI-2 的 13 个基本量表（或任意 87 个量表）指定预期值，求解一组回答使其剖面尽量贴合目标；求解强度三档（快速 / 标准 / 深度），性别可选，VRIN / TRIN 可选「原程序公式」或「修正公式」。结果区分**锁定题**（悬停看它影响哪些量表）与**自由题**（虚线框，点击即可随意翻转）；「换一组」重跑求解，「随机化自由题」在不改变剖面的前提下拉出另一套等价答卷。
+- **导出表格**（可多选内容 + 选格式）：答题表（567 题 × 题干 / 回答 / 是否自由）、量表剖面（87 个量表的原始分 / 美国 T / 中国 T）、目标达成（偏差与折算）、空白答题模板（供真人作答，无需先求解）。格式：`.xlsx`（勾选几项就出几张工作表，零依赖手写 XLSX 打包器）、CSV（带 BOM，Excel 打开不乱码）、TSV、HTML、JSON、Markdown。
+- **导入答卷并评分**：粘贴 567 字符 `T/F` 串、每行一个答案（`T/F`、`True/False`、`是/否`），或每行「题号,答案」，也可选 `.txt/.csv/.tsv` 文件；算出 87 量表剖面并列出；「用作求解目标」把读到的 13 个基本量表设为目标反推答卷。
+- **题库面板**：567 题原文一览——英文原题措辞 + 中文译文 + 当前回答 + 自由/锁定状态；可按题号或中英题干搜索，按「自由题 / 锁定题 / 作答是 / 作答否」筛选。不求解也能当可检索题库用。
+- **题干语言**：网格里的题干可选「中文 / 英文原文 / 中英对照」，悬停提示始终中英双列。
+- **深色 / 浅色模式**：工具栏一键切换，首次访问跟随系统偏好（`prefers-color-scheme`），选择记在 localStorage；`<head>` 内联脚本在首屏绘制前定主题，避免闪烁。
+- **多端自适应**：PC / 平板横屏走双栏布局，≤1024px 自动单列堆叠；≤640px 工具栏横向滚动、答题网格更密、表格收窄；手机横屏（矮高度）压缩头部并降低题库面板高度。
+- **中国常模 T 分**（仅 29 个量表有公开参数，其余一律留空而不编造数字），K 校正标注。
+- **自包含单文件**：`index.html` 是把全部脚本内联进一个 HTML 的产物，双击即可用，无需服务器、不受 `file://` 的 ES 模块限制（构建脚本 `build-site.mjs` 由 `index.src.html` + 源码生成）。MBTI 题本作为**异步分包**加载：首屏不含约 1 万条 KNN 样本，只有切到 MBTI 时才拉取。
+
+---
+
+## 支持的量表
+
+| 量表 | 类型 | 说明 |
+| --- | --- | --- |
+| MMPI-2 | 二值（567 题） | 87 个量表；T 分；29 个量表有中国常模 T；K 校正 |
+| SCL-90 | 李克特 | 症状自评；按维度设定目标分 |
+| PHQ-9 | 李克特 | 抑郁筛查（0–27） |
+| GAD-7 | 李克特 | 焦虑筛查 |
+| HADS | 李克特 | 焦虑与抑郁 |
+| WHO-5 | 李克特 | 主观幸福感 |
+| MBTI-93 | 类型学 | MBTI 93 题 |
+| MBTI-28（16P 快速） | 类型学 | 16personalities 快速版 28 题 |
+| 16P-93（16P 标准） | 类型学 | 16personalities 标准版 93 题 |
+| 16P-200（16P 完整） | 类型学 | 16personalities 完整版 200 题 |
+| MBTI-200MD | 类型学 | MBTI 200 题（权威完整版） |
+| 16P-60（KNN） | 类型学 | 16personalities 60 题（KNN 数据集） |
+
+---
+
+## 用法
+
+1. 打开上面的在线地址，或直接打开 `index.html`。
+2. 选量表，给其维度填目标分（支持搜索框与批量输入 `Hs=70`、`Sc 81`、`Pt:74`），点「生成答卷」。
+3. 右侧查看目标达成表、完整剖面与 567 题网格；需要存档就去左侧「导出表格」。
+
+本地跑：
+
+```bash
+python serve.py          # http://127.0.0.1:8137
+# 或
+npx serve .              # 任意静态服务器都行
+```
+
+> `index.html` 是自包含单文件，直接双击也能打开（无需起服务器、不受 `file://` 的 ES 模块限制）。本地开发用 `serve.py` 起服务也一样。
+
+---
+
+## 目录
+
+| 文件 | 作用 |
+| --- | --- |
+| `index.html` | **构建产物**：内联了全部脚本的单文件页面，GitHub Pages 入口，双击可用 |
+| `index.src.html` | 开发态的模块化页面骨架（`<script type="module" src="./gui.js">`），`build-site.mjs` 的输入 |
+| `data.js` | MMPI-2 的 567 题题干（中/英）、87 量表定义与键控、常模表、中国常模参数 |
+| `inverse.js` | 求解内核：计分、可达值、目标审计、反算、VRIN/TRIN |
+| `scl90.js` / `scl90.data.js`、`likert.js` | SCL-90（及通用李克特）量表定义、计分、目标量表 |
+| `phq9.data.js` / `gad7.data.js` / `hads.data.js` / `who5.data.js` | 李克特量表题库 |
+| `mbti*.data.js`、`mbti.js`、`mbti_types.js` | MBTI / 16personalities 题本与引擎（异步加载） |
+| `xlsx.js` | 零依赖 XLSX 打包器（ZIP store + 最小 OOXML 实现） |
+| `sheet.js` | 四张导出表的构建 + 六种格式的序列化 |
+| `ui-tokens.js` | 主题 / UX 文案 / 动效令牌，供构建阶段消费 |
+| `gui.js` | DOM 层：渲染、交互、导入导出面板（纯函数部分可在 Node 下测试） |
+| `build-site.mjs` | 把 `index.src.html` + 源码内联成单文件 `index.html`（`npm run build`） |
+| `serve.py` | 本地预览服务器（禁用缓存） |
+| `test-*.mjs` | Node 测试 |
+| `assets/` | 品牌图：`squarelike_diag.png`（顶部栏）、`squarelike_diag_favicon.png`（128px favicon）、`rectlike_diag.png`（底部品牌区） |
+
+---
+
+## 构建与测试
+
+```bash
+npm run build                       # node build-site.mjs  -> index.html
+npm test                           # 计分 / 求解 + 导出面板 + 导出表（node）
+node test-dom.mjs                  # jsdom 端到端冒烟（需 npm install jsdom）
+node test-mbti.mjs                 # MBTI 求解/引擎
+node test-scl90.mjs                # SCL-90 计分
+node test-likert.mjs               # 李克特计分
+node test-formats.mjs              # 导出序列化
+node test-gui-typology.mjs         # 类型学端到端
+```
+
+零**运行时**依赖；`jsdom` 仅 DOM 冒烟测试需要。
+
+---
+
+## 品牌与素材
+
+PsychoInverse 品牌素材：
+
+- **顶部栏图标 + favicon** —— `assets/squarelike_diag.png`，外加由其生成的 128×128 `assets/squarelike_diag_favicon.png`。
+- **底部品牌区** —— `assets/rectlike_diag.png`。
+
+两者均使用**跨性别旗对角渐变**（左上粉 → 白 → 右下蓝）透明底，与开发者名字的染色同源。页脚里的开发者名 `CynthiaLx_` 也用同一渐变渲染（浅色模式下为更深粉→蓝的双色以保证对比度）。
+
+---
+
+## 免责声明
+
+MMPI-2 的题目文本与常模受 Pearson 版权保护，仓库收录仅作学习与研究之用，不得用于商业分发；其他专有量表同理。本工具输出的是**满足指定剖面的合成答卷**，不是心理测量结果，**不可用于临床评估、诊断或任何实际人事/司法决策**，也不得用于伪造测验结果。请确认你所在司法辖区的适用规则。
+
+---
+
+## 许可与致谢
+
+MIT（见 `LICENSE`）。求解逻辑源自 `MMPI_2_Grader`（Luke Sweatman，MIT），本仓库是其浏览器端 JS 移植 + 导出/导入层扩展。
