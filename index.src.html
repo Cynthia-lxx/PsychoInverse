@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PsychoInverse · 量表反算器 | MMPI-2</title>
 <link rel="icon" type="image/png" href="assets/squarelike_diag_favicon.png">
+<link rel="icon" type="image/png" media="(prefers-color-scheme: light)" href="assets/squarelike_diag_favicon_light.png">
 <style>
   :root {
     --bg: #f4f6fa;
@@ -217,6 +218,10 @@
     height: 96px; width: auto; border-radius: 12px;
     border: none; background: none; object-fit: contain; max-width: 100%;
   }
+  /* Light theme: swap brand marks to the high-contrast rose->blue duotone,
+     matching the developer-name coloring (deep rose #b04a66 -> petrol blue #1f6f96). */
+  :root:not([data-theme="dark"]) .brandbar-icon { content: url('assets/squarelike_diag_light.png'); }
+  :root:not([data-theme="dark"]) .credits-logo { content: url('assets/rectlike_diag_light.png'); }
   .credits-cols { display: grid; grid-template-columns: repeat(3, minmax(110px, 1fr)); gap: 26px; }
   .credits-col { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
   .credits-col h3 {
