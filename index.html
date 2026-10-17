@@ -42,7 +42,7 @@
     --th-bg: #f6f8fc;
     --q-ink: #3a4456;
     --busy-bg: #e8f0fa;
-    --brandbar-h: 34px;
+    --brandbar-h: 68px;
     /* 动效令牌：由 ui-tokens.js 的 ANIM 生成，请勿手改 */
     --anim-scale: 1;
     --anim-fast: calc(.12s * var(--anim-scale));
@@ -206,7 +206,7 @@
     background: var(--panel); border-bottom: 1px solid var(--line);
   }
   .brandbar-icon {
-    height: 20px; width: auto; flex: none; border-radius: 6px;
+    height: 40px; width: auto; flex: none; border-radius: 8px;
     border: none; background: none; object-fit: contain;
   }
   .brandbar-slogan {
@@ -219,15 +219,14 @@
     color: var(--muted); font-size: 13px;
   }
   .credits-inner {
-    display: grid; grid-template-columns: minmax(180px, 1fr) 2.4fr;
+    display: grid; grid-template-columns: minmax(240px, 1fr) 2.4fr;
     gap: 36px; max-width: 1480px; margin: 0 auto;
   }
   .credits-brand { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .credits-logo {
-    height: 44px; width: auto; border-radius: 9px;
+    height: 96px; width: auto; border-radius: 12px;
     border: none; background: none; object-fit: contain; max-width: 100%;
   }
-  .credits-brand-note { margin: 0; font-size: 11.5px; color: var(--muted); }
   .credits-cols { display: grid; grid-template-columns: repeat(3, minmax(110px, 1fr)); gap: 26px; }
   .credits-col { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
   .credits-col h3 {
@@ -916,7 +915,6 @@
   <div class="credits-inner">
     <div class="credits-brand" aria-label="PsychoInverse 品牌区">
       <img class="credits-logo" src="assets/rectlike_diag.png" alt="PsychoInverse">
-      <p class="credits-brand-note">PsychoInverse · 量表反算器</p>
     </div>
     <nav class="credits-cols" aria-label="项目与联系方式">
       <section class="credits-col">
