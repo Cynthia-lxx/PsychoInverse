@@ -190,19 +190,27 @@ export const EXPORT_CONTENTS = [
   { id: 'template', label: '空白答题模板（供真人作答）' },
 ];
 
+/**
+ * MMPI-2 与 likert 量表的数据结构不同：likert 的 scales 每项都有 bind / bands，
+ * MMPI-2 的 scales 没有（它走 keys + T 表）。而 data.js 由脚本自动生成、
+ * **不含 id 字段**，所以 data.id === 'mmpi2' 永远为假 —— 改用结构判定来分流。
+ */
+const isMmpi2Data = (data) => !!(data && data.scales && data.scales[0] && !data.scales[0].bind);
+
 export function buildSheets(plan, options = {}) {
   const { content = ['answers'], withEnglish = true, withLockInfo = true, data = MMPI2_DATA } = options;
   const isMale = plan ? plan.isMale : true;
+  const mmpi2 = isMmpi2Data(data);
   const out = [];
   for (const id of content) {
     if (id === 'answers' && plan) out.push(answerSheet(plan, { withEnglish, withLockInfo, data }));
     if (id === 'profile' && plan) {
-      out.push(data.id === 'mmpi2'
+      out.push(mmpi2
         ? profileSheet(plan, { isMale, data })
         : likertProfileSheet(plan, data));
     }
     if (id === 'targets' && plan) {
-      out.push(data.id === 'mmpi2'
+      out.push(mmpi2
         ? targetSheet(plan, { isMale, data })
         : likertTargetSheet(plan, data));
     }

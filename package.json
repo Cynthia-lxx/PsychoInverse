@@ -7,7 +7,7 @@
   "scripts": {
     "serve": "python serve.py",
     "build": "node build-site.mjs",
-    "test": "node test-inverse.mjs && node test-gui.mjs && node test-sheet.mjs",
+    "test": "node test-inverse.mjs && node test-gui.mjs && node test-sheet.mjs && node test-likert.mjs && node test-scl90.mjs && node test-mbti.mjs && node test-formats.mjs",
     "test:dom": "node test-dom.mjs"
   },
   "dependencies": {
