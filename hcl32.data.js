@@ -1,0 +1,110 @@
+// 32 项轻躁狂症状清单（Hypomania Checklist-32, HCL-32；Angst 等 2005）。
+// 二值作答（是 / 否），总分 = 答「是」的题数，范围 0–32。
+// 英文题项取自官方问卷页 hcl32.org；中文为通行中文版。
+//
+// 只做总分：两因子（Active/Elated 与 Risk-Taking/Irritable）的逐题归属在不同研究中
+// 并不一致，故先不拆分为可设目标的因子。
+import { makeLikert } from './formats.js';
+
+const HCL32_FMT = makeLikert(2, ['否', '是']);
+const HCL32_FMTS = Array(32).fill('likert');
+
+export const HCL32_DATA = {
+  id: 'hcl32',
+  name: 'HCL-32 轻躁狂症状清单',
+  blurb: '选择目标「是」题数，反推出一份 32 题作答；用于双相谱系筛查的资料参考。',
+  targetLabel: '目标题数',
+  targetTableTitle: '得分达成',
+  scoreShift: 0,
+  nItems: 32,
+  items: {
+    zh: [
+      '我需要的睡眠比平时少',
+      '我感觉精力更充沛、活动更多',
+      '我更自信',
+      '我更享受我的工作',
+      '我更喜欢社交（打更多电话、更常外出）',
+      '我想去旅行，而且/或者旅行得更多',
+      '我开车时倾向于开得更快或冒更多风险',
+      '我花更多钱 / 花钱太多',
+      '我在日常生活中冒更多风险（工作和/或其他活动）',
+      '我的身体活动量更大（运动等）',
+      '我计划更多的活动或项目',
+      '我有更多想法，更有创造力',
+      '我不再害羞或拘束',
+      '我穿更鲜艳 / 更夸张的衣服或妆容',
+      '我想结识（并确实结识）更多人',
+      '我对「性」更感兴趣，和/或性欲增强',
+      '我更轻浮，和/或性行为更多',
+      '我说话更多',
+      '我思维更快',
+      '我说话时开更多玩笑或说更多俏皮话',
+      '我更容易分心',
+      '我投入很多新的事物',
+      '我的思绪从一个话题跳到另一个话题',
+      '我做事情更快和/或更容易',
+      '我更没耐心，和/或更容易激惹',
+      '我让别人感到疲惫或烦躁',
+      '我更多地与人争吵',
+      '我的心境更高涨、更乐观',
+      '我喝更多咖啡',
+      '我抽更多烟',
+      '我喝更多酒',
+      '我服用更多药物（镇静剂、抗焦虑药、兴奋剂）',
+    ],
+    en: [
+      'I need less sleep',
+      'I feel more energetic and more active',
+      'I am more self-confident',
+      'I enjoy my work more',
+      'I am more sociable (make more phone calls, go out more)',
+      'I want to travel and/or do travel more',
+      'I tend to drive faster or take more risks when driving',
+      'I spend more money/too much money',
+      'I take more risks in my daily life (in my work and/or other activities)',
+      'I am physically more active (sport etc.)',
+      'I plan more activities or projects',
+      'I have more ideas, I am more creative',
+      'I am less shy or inhibited',
+      'I wear more colourful and more extravagant clothes/make-up',
+      'I want to meet or actually do meet more people',
+      'I am more interested in sex, and/or have increased sexual desire',
+      'I am more flirtatious and/or am more sexually active',
+      'I talk more',
+      'I think faster',
+      'I make more jokes or puns when I am talking',
+      'I am more easily distracted',
+      'I engage in lots of new things',
+      'My thoughts jump from topic to topic',
+      'I do things more quickly and/or more easily',
+      'I am more impatient and/or get irritable more easily',
+      'I can be exhausting or irritating for others',
+      'I get into more quarrels',
+      'My mood is higher, more optimistic',
+      'I drink more coffee',
+      'I smoke more cigarettes',
+      'I drink more alcohol',
+      'I take more drugs (sedatives, anti-anxiety pills, stimulants)',
+    ],
+    format: HCL32_FMTS,
+  },
+  formats: { likert: HCL32_FMT },
+  scales: [
+    {
+      name: '总分',
+      fullName: 'HCL-32 总分',
+      family: 'mania',
+      bind: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+        17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+      ],
+      bandMetric: 'sum',
+      // 原研究以 ≥14 作为「提示双相谱系障碍」的分界值
+      bands: [
+        { min: 0, max: 13, minInc: true, maxInc: true, severity: '未达筛查阈值' },
+        { min: 14, max: 32, minInc: true, maxInc: true, severity: '达筛查阈值（提示双相谱系）' },
+      ],
+    },
+  ],
+  note: '总分 ≥ 14 提示双相谱系障碍可能。区分双相情感障碍与重度抑郁症的灵敏度约 80%、特异度约 51%（Cronbach α 约 0.79–0.86）。局限：该量表不能有效区分躁狂与轻躁狂症状，且仅作筛查、不作诊断。评定范围为终生，请回忆一段「心境高涨」的时期（当时未受药物 / 酒精影响）。',
+};

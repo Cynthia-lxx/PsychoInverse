@@ -54,6 +54,12 @@ import { PHQ9_DATA } from './phq9.data.js';
 import { GAD7_DATA } from './gad7.data.js';
 import { HADS_DATA } from './hads.data.js';
 import { WHO5_DATA } from './who5.data.js';
+import { SDS_DATA } from './sds.data.js';
+import { SAS_DATA } from './sas.data.js';
+import { HCL32_DATA } from './hcl32.data.js';
+import { HCL33_DATA } from './hcl33.data.js';
+import { CTQSF_DATA, ctqsfTargetScales } from './ctqsf.js';
+import { PCL5_DATA } from './pcl5.data.js';
 
 // MBTI 数据/引擎按需异步加载：首屏不内联 1 万条 KNN 样本，切到 MBTI 时才拉取。
 let MBTI_TYPES_16 = [];
@@ -259,6 +265,12 @@ const SCALES = {
   gad7: { id: 'gad7', short: 'GAD-7', label: 'GAD-7 焦虑筛查量表', cat: 'mood', binary: false, data: GAD7_DATA },
   hads: { id: 'hads', short: 'HADS', label: 'HADS 焦虑抑郁量表', cat: 'mood', binary: false, data: HADS_DATA },
   who5: { id: 'who5', short: 'WHO-5', label: 'WHO-5 主观幸福感量表', cat: 'mood', binary: false, data: WHO5_DATA },
+  sds: { id: 'sds', short: 'SDS', label: 'SDS 抑郁自评量表', cat: 'mood', binary: false, data: SDS_DATA },
+  sas: { id: 'sas', short: 'SAS', label: 'SAS 焦虑自评量表', cat: 'mood', binary: false, data: SAS_DATA },
+  hcl32: { id: 'hcl32', short: 'HCL-32', label: 'HCL-32 轻躁狂症状清单', cat: 'bipolar', binary: false, data: HCL32_DATA },
+  hcl33: { id: 'hcl33', short: 'HCL-33', label: 'HCL-33 轻躁狂症状清单（中文版）', cat: 'bipolar', binary: false, data: HCL33_DATA },
+  ctqsf: { id: 'ctqsf', short: 'CTQ-SF', label: 'CTQ-SF 儿童期创伤问卷简版', cat: 'trauma', binary: false, data: CTQSF_DATA },
+  pcl5: { id: 'pcl5', short: 'PCL-5', label: 'PCL-5 创伤后应激障碍检查清单', cat: 'trauma', binary: false, data: PCL5_DATA },
   mbti93: { id: 'mbti93', short: 'MBTI-93', label: 'MBTI 职业性格测试（93 题）', cat: 'typology', typology: true, data: null },
   mbti16p28: { id: 'mbti16p_quick', short: 'MBTI-28', label: '16personalities 快速版（28 题）', cat: 'typology', typology: true, data: null },
   mbti16p93: { id: 'mbti16p_standard', short: '16P-93', label: '16personalities 标准版（93 题）', cat: 'typology', typology: true, data: null },
@@ -2416,8 +2428,11 @@ function wire() {
 
 function buildLikertScaleList() {
   const data = currentData();
-  // SCL-90 用其专属预设均值（漂亮的整数均值）；其余量表直接用通用引擎枚举
-  const scales = state.scale === 'scl90' ? scl90TargetScales() : likertTargetScales(data);
+  // SCL-90 用其专属预设均值（漂亮的整数均值）；CTQ-SF 需排除 MD 效度分量表；
+  // 其余量表直接用通用引擎枚举
+  const scales = state.scale === 'scl90' ? scl90TargetScales()
+    : state.scale === 'ctqsf' ? ctqsfTargetScales()
+    : likertTargetScales(data);
   const html = scales
     .map((s) => {
       const unit = s.metric === 'sum' ? '总分' : '均分';

@@ -1,0 +1,112 @@
+// 33 项轻躁狂症状清单（33-item Hypomania Checklist, HCL-33；Feng 等 2015，北京安定医院）。
+// 二值作答（是 / 否），总分 = 答「是」的题数，范围 0–33。
+//
+// 与 HCL-32 的关系：HCL-32 的第 16、17 题在此合并为第 16 题，末尾新增
+// 第 32 题（游戏 / 赌博增多）与第 33 题（进食 / 暴食增多），故为 33 题。
+// 英文题项取自 PMC8684563（Int J Bipolar Disord 2021;9:41，CC BY 4.0）Table 3。
+import { makeLikert } from './formats.js';
+
+const HCL33_FMT = makeLikert(2, ['否', '是']);
+const HCL33_FMTS = Array(33).fill('likert');
+
+export const HCL33_DATA = {
+  id: 'hcl33',
+  name: 'HCL-33 轻躁狂症状清单（中文版）',
+  blurb: '选择目标「是」题数，反推出一份 33 题作答；中文版双相障碍筛查资料参考。',
+  targetLabel: '目标题数',
+  targetTableTitle: '得分达成',
+  scoreShift: 0,
+  nItems: 33,
+  items: {
+    zh: [
+      '我需要的睡眠时间比平时少',
+      '我感觉比平时更有精力并且更加活跃',
+      '我比平时更自信',
+      '我更加享受工作',
+      '我社交活动增多（打电话比平时多、外出比平时多）',
+      '我更想去旅行，和/或旅行的确比平时多',
+      '我开车比平时快，或开车不顾危险',
+      '我花钱比平时多，或花了太多钱',
+      '在日常生活中我比平时更冒险（在工作或在其它活动上）',
+      '我活动量增多（如体育运动等）',
+      '我有更多的打算，或计划更多的活动',
+      '我有更多的点子，或更具有创造力',
+      '我很少害羞或者感到约束',
+      '我会穿更加鲜艳、更加奢侈的衣服／用更鲜艳、更奢侈的化妆品',
+      '我想和更多的人接触，或者的确接触了更多的人',
+      '我对「性」更感兴趣，和/或性行为更活跃',
+      '我讲话更多',
+      '我思维更快',
+      '我讲话时会开更多的玩笑或者说更多双关语',
+      '我比平时容易分心',
+      '我尝试许多新鲜事物',
+      '我的思维从一个话题跳到另一个话题',
+      '我做事情更快和/或更容易',
+      '我更容易不耐烦，和/或更容易激惹',
+      '我让别人感到疲惫或烦躁',
+      '我更多地与人争吵',
+      '我的心境更高涨、更乐观',
+      '我喝更多咖啡',
+      '我抽更多烟',
+      '我喝更多酒',
+      '我服用更多药物（镇静剂、抗焦虑药、兴奋剂等）',
+      '我更多地玩游戏或赌博',
+      '我吃得更多，或暴食更多',
+    ],
+    en: [
+      'I need less sleep',
+      'I feel more energetic and more active',
+      'I am more self-confident',
+      'I enjoy my work more',
+      'I am more sociable (make more phone calls, go out more)',
+      'I want to travel and/or do travel more',
+      'I tend to drive faster or take more risks when driving',
+      'I spend more money/too much money',
+      'I take more risks in my daily life (in my work and/or other activities)',
+      'I am physically more active (sport etc.)',
+      'I plan more activities or projects',
+      'I have more ideas, I am more creative',
+      'I am less shy or inhibited',
+      'I wear more colourful and more extravagant clothes/make-up',
+      'I want to meet or actually do meet more people',
+      'I am more interested in sex and/or I am more sexually active',
+      'I talk more',
+      'I think faster',
+      'I make more jokes or puns when I am talking',
+      'I am more easily distracted',
+      'I engage in lots of new things',
+      'My thoughts jump from topic to topic',
+      'I do things more quickly and/or more easily',
+      'I am more impatient and/or get irritable more easily',
+      'I can be exhausting or irritating for others',
+      'I get into more quarrels',
+      'My mood is higher, more optimistic',
+      'I drink more coffee',
+      'I smoke more cigarettes',
+      'I drink more alcohol',
+      'I take more drugs (sedatives, anxiolytics, stimulants…)',
+      'I game or gamble more',
+      'I eat more or I binge more',
+    ],
+    format: HCL33_FMTS,
+  },
+  formats: { likert: HCL33_FMT },
+  scales: [
+    {
+      name: '总分',
+      fullName: 'HCL-33 总分',
+      family: 'mania',
+      bind: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+        18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
+      ],
+      bandMetric: 'sum',
+      // 成人原始验证文献以 ≥20 为最优 cutoff（Youden 指数）
+      bands: [
+        { min: 0, max: 19, minInc: true, maxInc: true, severity: '未达筛查阈值' },
+        { min: 20, max: 33, minInc: true, maxInc: true, severity: '达筛查阈值（提示双相障碍）' },
+      ],
+    },
+  ],
+  note: '本模块采用成人 cutoff = 20（原始验证文献，Youden 指数）。注意 cutoff 随人群浮动：青少年样本为 14，中国青少年研究为 18，俄罗斯成人研究为 16，使用时须按人群选择。HCL-33 区分双相 II 型的灵敏度优于 HCL-32 与 MDQ。另有 HCL-33-EA（外部评估版，由他人评定）不属自评、未纳入本模块。仅作筛查、不作诊断。',
+};
