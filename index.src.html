@@ -446,6 +446,23 @@
   .typ-quick .dropdown { flex: 1; min-width: 0; display: block; }
   .typ-quick .dropdown-trigger { padding: 5px 8px; }
 
+  /* 分组下拉的搜索框 / 分组小标题 / 空状态。
+     .dropdown-body 让 .dropdown-panel 仍只有单个子元素，展开动效照常。 */
+  .dropdown-body { overflow: hidden; min-height: 0; display: flex; flex-direction: column; }
+  .dropdown-search {
+    box-sizing: border-box; width: 100%; margin: 0 0 4px;
+    padding: 6px 8px; font: inherit; font-size: 13px; color: var(--ink);
+    background: var(--input-bg); border: 1px solid var(--line); border-radius: 6px;
+  }
+  .dropdown-search::placeholder { color: var(--muted); }
+  .dropdown-search:focus { outline: none; border-color: var(--accent); }
+  .dropdown-group {
+    position: sticky; top: 0; z-index: 1; background: var(--panel);
+    padding: 8px 10px 4px; font-size: 11px; font-weight: 600; color: var(--muted);
+  }
+  .dropdown-group:first-child { padding-top: 4px; }
+  .dropdown-empty { padding: 10px; font-size: 12px; color: var(--muted); text-align: center; }
+
   /* ===== 移动端 / 低分辨率：下拉改为底部叠加面板（bottom sheet），避免控件过小 ===== */
   .dd-sheet-scrim {
     position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-end; justify-content: center;
@@ -469,6 +486,18 @@
     width: 30px; height: 30px; border-radius: 50%; font-size: 14px; line-height: 1; cursor: pointer;
   }
   .dd-sheet-close:hover { color: var(--ink); }
+  /* 移动端 bottom sheet 内的搜索框：加大触控尺寸，且默认隐藏（仅分组下拉显示） */
+  .dd-sheet-search {
+    box-sizing: border-box; width: calc(100% - 32px); margin: 10px 16px 0;
+    padding: 10px 12px; font: inherit; font-size: 15px; color: var(--ink);
+    background: var(--input-bg); border: 1px solid var(--line); border-radius: 10px;
+  }
+  .dd-sheet-search::placeholder { color: var(--muted); }
+  .dd-sheet-search[hidden] { display: none; }
+  .dd-sheet-search:focus { outline: none; border-color: var(--accent); }
+  /* sheet 里的选项加大到易点按的尺寸 */
+  .dd-sheet-list .dropdown-option { padding: 11px 12px; font-size: 15px; }
+  .dd-sheet-list .dropdown-group { padding: 12px 12px 6px; font-size: 12px; }
   .dd-sheet-list {
     list-style: none; margin: 0; padding: 6px 10px 16px; overflow-y: auto; flex: 1 1 auto; min-height: 0;
     -webkit-overflow-scrolling: touch;

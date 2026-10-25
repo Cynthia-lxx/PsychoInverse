@@ -235,20 +235,36 @@ async function ensureMbti() {
   progress.finish();
 }
 
-/** 量表注册表：加一个新量表 = 在这里加一行 + 一个数据模块 + 下拉里加一个 option。 */
+/**
+ * 量表大类（量表和下拉里的分组）。数组顺序即下拉分组顺序；
+ * 只渲染「当前至少含一个量表」的分组，因此可以先占位、后接入量表。
+ */
+const SCALE_CATS = [
+  ['core', '综合评估'],
+  ['mood', '情绪筛查（抑郁 / 焦虑）'],
+  ['bipolar', '双相与躁狂'],
+  ['trauma', '创伤与应激'],
+  ['eating', '进食与行为'],
+  ['cognitive', '认知功能'],
+  ['personality', '人格障碍'],
+  ['social', '社会功能'],
+  ['typology', '人格类型（MBTI / 16P）'],
+];
+
+/** 量表注册表：加一个新量表 = 在这里加一行（含 cat）+ 一个数据模块。 */
 const SCALES = {
-  mmpi2: { id: 'mmpi2', short: 'MMPI-2', label: 'MMPI-2 明尼苏达多项人格测验', binary: true, data: MMPI2_DATA },
-  scl90: { id: 'scl90', short: 'SCL-90', label: 'SCL-90 症状自评量表', binary: false, data: SCL90_DATA },
-  phq9: { id: 'phq9', short: 'PHQ-9', label: 'PHQ-9 抑郁症筛查量表', binary: false, data: PHQ9_DATA },
-  gad7: { id: 'gad7', short: 'GAD-7', label: 'GAD-7 焦虑筛查量表', binary: false, data: GAD7_DATA },
-  hads: { id: 'hads', short: 'HADS', label: 'HADS 焦虑抑郁量表', binary: false, data: HADS_DATA },
-  who5: { id: 'who5', short: 'WHO-5', label: 'WHO-5 主观幸福感量表', binary: false, data: WHO5_DATA },
-  mbti93: { id: 'mbti93', short: 'MBTI-93', label: 'MBTI 职业性格测试（93 题）', typology: true, data: null },
-  mbti16p28: { id: 'mbti16p_quick', short: 'MBTI-28', label: '16personalities 快速版（28 题）', typology: true, data: null },
-  mbti16p93: { id: 'mbti16p_standard', short: '16P-93', label: '16personalities 标准版（93 题）', typology: true, data: null },
-  mbti16p200: { id: 'mbti16p_full', short: '16P-200', label: '16personalities 完整版（200 题）', typology: true, data: null },
-  mbti200md: { id: 'mbti200md', short: 'MBTI-200MD', label: 'MBTI 200 题（权威完整版）', typology: true, data: null },
-  mbti16p60: { id: 'mbti16p60', short: '16P-60', label: '16personalities 60 题（KNN 数据集）', typology: true, data: null },
+  mmpi2: { id: 'mmpi2', short: 'MMPI-2', label: 'MMPI-2 明尼苏达多项人格测验', cat: 'core', binary: true, data: MMPI2_DATA },
+  scl90: { id: 'scl90', short: 'SCL-90', label: 'SCL-90 症状自评量表', cat: 'core', binary: false, data: SCL90_DATA },
+  phq9: { id: 'phq9', short: 'PHQ-9', label: 'PHQ-9 抑郁症筛查量表', cat: 'mood', binary: false, data: PHQ9_DATA },
+  gad7: { id: 'gad7', short: 'GAD-7', label: 'GAD-7 焦虑筛查量表', cat: 'mood', binary: false, data: GAD7_DATA },
+  hads: { id: 'hads', short: 'HADS', label: 'HADS 焦虑抑郁量表', cat: 'mood', binary: false, data: HADS_DATA },
+  who5: { id: 'who5', short: 'WHO-5', label: 'WHO-5 主观幸福感量表', cat: 'mood', binary: false, data: WHO5_DATA },
+  mbti93: { id: 'mbti93', short: 'MBTI-93', label: 'MBTI 职业性格测试（93 题）', cat: 'typology', typology: true, data: null },
+  mbti16p28: { id: 'mbti16p_quick', short: 'MBTI-28', label: '16personalities 快速版（28 题）', cat: 'typology', typology: true, data: null },
+  mbti16p93: { id: 'mbti16p_standard', short: '16P-93', label: '16personalities 标准版（93 题）', cat: 'typology', typology: true, data: null },
+  mbti16p200: { id: 'mbti16p_full', short: '16P-200', label: '16personalities 完整版（200 题）', cat: 'typology', typology: true, data: null },
+  mbti200md: { id: 'mbti200md', short: 'MBTI-200MD', label: 'MBTI 200 题（权威完整版）', cat: 'typology', typology: true, data: null },
+  mbti16p60: { id: 'mbti16p60', short: '16P-60', label: '16personalities 60 题（KNN 数据集）', cat: 'typology', typology: true, data: null },
 };
 
 /** 当前量表的元数据。 */
@@ -2620,16 +2636,23 @@ function ensureSheet() {
   closeBtn.setAttribute('aria-label', '关闭');
   closeBtn.textContent = '✕';
   head.append(title, closeBtn);
+  // 搜索框：仅「含分组」的下拉显示（默认隐藏，由 openSheet 按情况开启）
+  const searchEl = document.createElement('input');
+  searchEl.type = 'search';
+  searchEl.className = 'dd-sheet-search';
+  searchEl.placeholder = '搜索量表（如 SDS、PHQ）';
+  searchEl.setAttribute('aria-label', '搜索选项');
+  searchEl.hidden = true;
   const listEl = document.createElement('ul');
   listEl.className = 'dd-sheet-list';
   listEl.setAttribute('role', 'listbox');
   listEl.tabIndex = -1;
-  sheet.append(head, listEl);
+  sheet.append(head, searchEl, listEl);
   scrim.append(sheet);
   document.body.append(scrim);
   scrim.addEventListener('click', (e) => { if (e.target === scrim) closeSheet(); });
   closeBtn.addEventListener('click', () => closeSheet());
-  _sheet = { scrim, sheet, head, title, listEl, closeBtn };
+  _sheet = { scrim, sheet, head, title, searchEl, listEl, closeBtn };
   return _sheet;
 }
 
@@ -2731,39 +2754,152 @@ function hydrateDropdown(select) {
   };
   let activeIdx = -1;
   let surface = null; // 'inline' | 'sheet'
+
+  /* ---- 分组 + 搜索：仅当原生 select 含 <optgroup> 时启用（目前只有「量表」切换），
+     其余下拉（性别、强度、T 分、语言…）完全保持原样，不受影响 ---- */
+  const groups = [...select.querySelectorAll('optgroup')];
+  const searchable = groups.length > 0;
+  const visibleOptions = (targetUl) =>
+    [...targetUl.querySelectorAll('.dropdown-option')].filter((li) => !li.hidden);
+
+  const searchEl = searchable ? document.createElement('input') : null;
+  if (searchEl) {
+    // 搜索框与列表一起装进 .dropdown-body，使 .dropdown-panel 仍只有**单个**子元素，
+    // 原有的 grid-template-rows: 0fr -> 1fr 展开动效因此照常工作（panel 直接放两个
+    // 子元素会让第二行退化成 auto，动效失效）。
+    const body = document.createElement('div');
+    body.className = 'dropdown-body';
+    searchEl.type = 'search';
+    searchEl.className = 'dropdown-search';
+    searchEl.placeholder = '搜索量表（如 SDS、PHQ）';
+    searchEl.setAttribute('aria-label', '搜索选项');
+    body.append(searchEl, list); // append 会移动节点，list 随之进入 body
+    panel.appendChild(body);
+  }
+
+  const applyFilter = (targetUl, q) => {
+    if (!searchable) return;
+    const needle = String(q || '').trim().toLowerCase();
+    [...targetUl.querySelectorAll('.dropdown-option')].forEach((li) => {
+      const hay = String(li.dataset.search || li.textContent || '').toLowerCase();
+      li.hidden = !!needle && !hay.includes(needle);
+    });
+    // 某分组的选项全被过滤掉时，连组标题一起隐藏
+    [...targetUl.querySelectorAll('.dropdown-group')].forEach((g) => {
+      let n = 0;
+      let el = g.nextElementSibling;
+      while (el && !el.classList.contains('dropdown-group')) {
+        if (el.classList.contains('dropdown-option') && !el.hidden) n += 1;
+        el = el.nextElementSibling;
+      }
+      g.hidden = n === 0;
+    });
+    const empty = targetUl.querySelector('.dropdown-empty');
+    if (empty) empty.hidden = visibleOptions(targetUl).length > 0;
+  };
+
   const buildOptions = (targetUl) => {
     targetUl.innerHTML = '';
-    [...select.options].forEach((o, i) => {
+    const addOption = (o, i) => {
       const li = document.createElement('li');
       li.className = 'dropdown-option';
       li.setAttribute('role', 'option');
       li.dataset.value = o.value;
+      li.dataset.search = `${o.dataset.kw || ''} ${o.textContent || ''}`;
       li.textContent = o.textContent;
       if (o.value === select.value) { li.classList.add('selected'); activeIdx = i; }
       li.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); selectOption(li); });
       targetUl.appendChild(li);
+    };
+    [...select.options].forEach(addOption);
+    if (!searchable) return;
+    // 分组下拉：在每个 option 前插入所属 optgroup 的小标题
+    let gi = 0;
+    groups.forEach((g) => {
+      const head = document.createElement('li');
+      head.className = 'dropdown-group';
+      head.setAttribute('role', 'presentation');
+      head.textContent = g.label;
+      targetUl.insertBefore(head, targetUl.children[gi]);
+      gi += 1;
+      [...g.querySelectorAll('option')].forEach(() => { gi += 1; });
     });
+    const empty = document.createElement('li');
+    empty.className = 'dropdown-empty';
+    empty.setAttribute('role', 'presentation');
+    empty.textContent = '没有匹配的量表';
+    empty.hidden = true;
+    targetUl.appendChild(empty);
   };
   const openInline = () => {
     surface = 'inline';
-    if (list.children.length !== select.options.length) buildOptions(list);
+    if (list.querySelectorAll('.dropdown-option').length !== select.options.length) buildOptions(list);
     else list.querySelectorAll('.dropdown-option').forEach((li) => {
       const on = li.dataset.value === select.value;
       li.classList.toggle('selected', on);
-      if (on) activeIdx = [...list.children].indexOf(li);
+      if (on) activeIdx = [...list.querySelectorAll('.dropdown-option')].indexOf(li);
     });
+    if (searchEl) { searchEl.value = ''; applyFilter(list, ''); }
     panel.hidden = false;
     _raf(() => wrap.classList.add('open'));
     trigger.setAttribute('aria-expanded', 'true');
-    setActive([...list.children], activeIdx < 0 ? 0 : activeIdx);
-    trigger.focus();
+    setActive(visibleOptions(list), activeIdx < 0 ? 0 : activeIdx);
+    // 有搜索框时把焦点交给它，打开即可直接输入；否则维持聚焦触发器的原行为
+    if (searchEl) searchEl.focus(); else trigger.focus();
   };
+  if (searchEl) {
+    searchEl.addEventListener('input', () => {
+      applyFilter(list, searchEl.value);
+      const items = visibleOptions(list);
+      if (items.length) setActive(items, 0);
+    });
+    searchEl.addEventListener('keydown', (e) => {
+      const items = visibleOptions(list);
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (items.length) setActive(items, activeIdx + 1 >= 0 ? activeIdx + 1 : 0);
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        const act = items.find((li) => li.classList.contains('active')) || items[0];
+        if (act) selectOption(act);
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeCurrent();
+        trigger.focus();
+      }
+    });
+  }
   const closeBtnFocus = () => { if (_sheet) _sheet.closeBtn.focus(); };
   const openSheet = () => {
     surface = 'sheet';
     const s = ensureSheet();
     s.title.textContent = label.textContent || select.getAttribute('aria-label') || '请选择';
     buildOptions(s.listEl);
+    if (s.searchEl) {
+      s.searchEl.hidden = !searchable;
+      s.searchEl.value = '';
+      applyFilter(s.listEl, '');
+      s.searchEl.oninput = () => {
+        applyFilter(s.listEl, s.searchEl.value);
+        const items = visibleOptions(s.listEl);
+        if (items.length) setActive(items, 0);
+      };
+      s.searchEl.onkeydown = (e) => {
+        const items = visibleOptions(s.listEl);
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (items.length) setActive(items, activeIdx + 1 >= 0 ? activeIdx + 1 : 0);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          const act = items.find((li) => li.classList.contains('active')) || items[0];
+          if (act) selectOption(act);
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeSheet();
+          closeBtnFocus();
+        }
+      };
+    }
     const sel = s.listEl.querySelector('.dropdown-option.selected');
     if (sel && typeof sel.scrollIntoView === 'function') sel.scrollIntoView({ block: 'center' });
     s.scrim.hidden = false;
@@ -2771,9 +2907,10 @@ function hydrateDropdown(select) {
     _raf(() => s.scrim.classList.add('open'));
     trigger.setAttribute('aria-expanded', 'true');
     s.scrim._owner = { setClosed: () => { trigger.setAttribute('aria-expanded', 'false'); surface = null; } };
+    // 移动端不自动聚焦搜索框（否则软键盘会盖住列表），保持聚焦列表本身
     s.listEl.focus();
     s.listEl.onkeydown = (e) => {
-      const items = [...s.listEl.children];
+      const items = visibleOptions(s.listEl);
       if (e.key === 'ArrowDown') { e.preventDefault(); setActive(items, activeIdx + 1); }
       else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(items, activeIdx - 1); }
       else if (e.key === 'Home') { e.preventDefault(); setActive(items, 0); }
@@ -2927,9 +3064,18 @@ export function init() {
   dom.note.hidden = true;
   dom.results.hidden = true;
   if (dom.scaleSwitch) {
-    dom.scaleSwitch.innerHTML = Object.entries(SCALES)
-      .map(([k, s]) => `<option value="${k}">${s.label}</option>`)
-      .join('');
+    // 按大类分组：只渲染「当前至少有一个量表」的分组，未接入的分类不会出现空 optgroup。
+    // data-kw 供自研下拉的搜索框检索（id + 缩写 + 中文全名）。
+    const esc = (v) => String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    dom.scaleSwitch.innerHTML = SCALE_CATS.map(([cat, catLabel]) => {
+      const inCat = Object.entries(SCALES).filter(([, s]) => (s.cat || 'core') === cat);
+      if (!inCat.length) return '';
+      const opts = inCat
+        .map(([k, s]) => `<option value="${esc(k)}" data-kw="${esc([k, s.short, s.label].filter(Boolean).join(' '))}">${esc(s.label)}</option>`)
+        .join('');
+      return `<optgroup label="${esc(catLabel)}">${opts}</optgroup>`;
+    }).join('');
     dom.scaleSwitch.value = state.scale;
     document.body.setAttribute('data-scale', state.scale);
   }
